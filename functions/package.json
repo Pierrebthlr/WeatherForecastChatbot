@@ -22,7 +22,8 @@
     "flow": "^0.2.3",
     "flow-typed": "^2.5.1",
     "mocha": "^5.2.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "sinon": "^6.3.4"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

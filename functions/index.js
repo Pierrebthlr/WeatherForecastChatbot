@@ -13,7 +13,6 @@ process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
 function parseWeatherApiResponse(body) {
   return new Promise((resolve) => {
     // After all the data has been received parse the JSON for desired data
-    console.log(body);
     const response = JSON.parse(body);
     // Test is the response has a error field
     if (!response.data.error) {
@@ -31,7 +30,7 @@ function parseWeatherApiResponse(body) {
       resolve(output);
     } else {
       // create response if the API doesn't give any information
-      const output = 'I don\'t have any information for this date on this city try with other information';
+      const output = response.data.error[0].msg;
       resolve(output);
     }
   });

@@ -22,7 +22,7 @@ describe('Unit Test for the Firebase functions', () => {
   });
   it('Test the API call and the parse response of a wrong city', () => {
     // define the data to compare against.
-    const suppose = 'I don\'t have any information for this date on this city try with other information';
+    const suppose = 'Unable to find any matching weather location to the query submitted!';
     // call the function we're testing
     const result = myFunctions.callWeatherApi('');
 
