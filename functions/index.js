@@ -9,12 +9,14 @@ const wwoApiKey = '3db1195e2df8427fa2a152813181909';
 
 process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
 
+// this function parse the API response and send it back the meteo forecast
 function parseWeatherApiResponse(body) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // After all the data has been received parse the JSON for desired data
     console.log(body);
     const response = JSON.parse(body);
-    if (response.data) {
+    // Test is the response has a error field
+    if (!response.data.error) {
       const forecast = response.data.weather[0];
       const location = response.data.request[0];
       const conditions = response.data.current_condition[0];
@@ -28,12 +30,13 @@ function parseWeatherApiResponse(body) {
       ${forecast.date}.`;
       resolve(output);
     } else {
-      const logError = 'I don\'t have any information for this date on this city try with other information';
-      reject(logError);
+      // create response if the API doesn't give any information
+      const output = 'I don\'t have any information for this date on this city try with other information';
+      resolve(output);
     }
   });
 }
-
+// This function call the weather API collect the data and send back the meteo forecast
 function callWeatherApi(city) {
   return new Promise((resolve, reject) => {
     // Create the path for the HTTP request to get the weather
@@ -48,7 +51,7 @@ function callWeatherApi(city) {
       res.on('end', () => {
         parseWeatherApiResponse(body).then((output) => {
           resolve(output);
-        }).catch((logError) => {
+        }).catch((logError) => { // catch the possible errors during parsing
           reject(logError);
         });
       });
@@ -60,29 +63,29 @@ function callWeatherApi(city) {
   });
 }
 
-
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
   const agent = new WebhookClient({ request, response });
-
+  // Handler for weather intent
   function weatherRequest() {
     return new Promise((resolve) => {
       // City is a required parameter
       const city = request.body.queryResult.parameters['geo-city'];
       callWeatherApi(city).then((output) => {
+        // Send the weather forecast
         agent.add(output);
         resolve();
       }).catch((logError) => {
+        // Send the LogError if something wrong happen during the processus
         agent.add(logError);
         resolve();
       });
     });
   }
-
+  // Handler for Default fallback intent
   function fallback() {
     agent.add('I didn\'t understand');
     agent.add('I\'m sorry, can you try again?');
   }
-
 
   const intentMap = new Map();
   intentMap.set('Weather Intent', weatherRequest);
@@ -93,6 +96,5 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 });
 
 // EXPORTS
-
 exports.callWeatherApi = callWeatherApi;
 exports.parseWeatherApiResponse = parseWeatherApiResponse;

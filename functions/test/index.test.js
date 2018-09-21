@@ -2,31 +2,31 @@
 
 
 // const test = require('firebase-functions-test')();
-const { expect } = require('chai');
-const assert = require('assert');
+const chai = require('chai');
+
+const { expect } = chai;
+const chaiAsPromised = require('chai-as-promised');
+
+chai.use(chaiAsPromised);
 const myFunctions = require('../index.js');
 
-
-it('Should be include in the parse response', (done) => {
-  // define some data to compare against
-  const suppose = 'Current conditions in the City\n      Paris, France';
-  // call the function we're testing
-  const result = myFunctions.callWeatherApi('Paris');
-
-  // assertions
-  result.then((data) => {
-    expect(data).to.include(suppose);
-    done();
-  }).catch((logError) => {
-    assert.fail(logError);
-    done();
+describe('Unit Test for the Firebase functions', () => {
+  it('Test the API call and the parse response of a good city', () => {
+    // define the data to compare against. As the response depend of the date we can test only
+    // the begining of the response
+    const suppose = 'Current conditions in the City\n      Paris, France';
+    // call the function we're testing
+    const result = myFunctions.callWeatherApi('Paris');
+    // Test if the result correspond to the expect message
+    return expect(result).to.eventually.include(suppose);
   });
-});
+  it('Test the API call and the parse response of a wrong city', () => {
+    // define the data to compare against.
+    const suppose = 'I don\'t have any information for this date on this city try with other information';
+    // call the function we're testing
+    const result = myFunctions.callWeatherApi('');
 
-
-it('Should be a string', (done) => {
-  // define some data to compare against
-  const host = 'api.worldweatheronline.com';
-  expect(host).to.be.a('string');
-  done();
+    // Test if the result correspond to the expect message
+    return expect(result).to.eventually.equal(suppose);
+  });
 });
